@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}</style>
+<title>SidelineReel Look-alike Check</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: one working column (max 920px). Sticky header carries the Coach/Parent switch.
+   Coach gets four tabs. Clip cards put the camera still on the left and the decision on the right, stacking on phones. */
+:root{
+  --bg:#F2F5F3; --surface:#FFFFFF; --sunk:#E7ECE9; --ink:#14211B; --muted:#55655D; --line:#D2DBD6;
+  --accent:#2447A8; --accent-ink:#FFFFFF; --accent-soft:#E3E9FA;
+  --hold:#8A5200; --hold-bg:#FFF0D2; --ok:#17663F; --ok-bg:#DDF2E6; --alert:#A8261D; --alert-bg:#FCE4E1;
+  --pitch:#2F7D4F; --pitch-2:#29704A; --jersey:#F4F6FA; --jersey-ink:#1A2440; --frame-ink:#FFFFFF; --frame-shade:rgba(0,0,0,.6);
+  --display:"Barlow Condensed","Arial Narrow",Impact,sans-serif;
+  --body:"Barlow","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0F1513; --surface:#18201C; --sunk:#111815; --ink:#E8EFEA; --muted:#9DADA5; --line:#2B3731;
+  --accent:#9DB2FF; --accent-ink:#0E1630; --accent-soft:#1E2A4D;
+  --hold:#FFC766; --hold-bg:#3A2A08; --ok:#7FD9A6; --ok-bg:#12301F; --alert:#FF9C93; --alert-bg:#3D1512;
+  --pitch:#245E3C; --pitch-2:#1F5435; --jersey:#E9EDF5; --jersey-ink:#1A2440; --frame-ink:#FFFFFF; --frame-shade:rgba(0,0,0,.6);
+  color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0F1513; --surface:#18201C; --sunk:#111815; --ink:#E8EFEA; --muted:#9DADA5; --line:#2B3731;
+  --accent:#9DB2FF; --accent-ink:#0E1630; --accent-soft:#1E2A4D;
+  --hold:#FFC766; --hold-bg:#3A2A08; --ok:#7FD9A6; --ok-bg:#12301F; --alert:#FF9C93; --alert-bg:#3D1512;
+  --pitch:#245E3C; --pitch-2:#1F5435; --jersey:#E9EDF5; --jersey-ink:#1A2440; --frame-ink:#FFFFFF; --frame-shade:rgba(0,0,0,.6);
+  color-scheme:dark }
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:400 15px/1.5 var(--body);margin:0}
+#app{max-width:920px;margin:0 auto;padding-inline:16px;padding-block:0 40px}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;padding-block:12px;border-bottom:1px solid var(--line)}
+.brand{display:flex;flex-direction:column;min-width:0}
+.mark{font:700 24px/1 var(--display);letter-spacing:.02em;text-transform:uppercase}
+.brand .sub{font-size:13px;color:var(--muted)}
+.ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.seg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:transparent;color:var(--muted);font:600 14px var(--body);padding:8px 16px;min-height:38px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.sample{margin:10px 0 0;font-size:13px;color:var(--muted)}
+.tabs{display:flex;gap:2px;overflow-x:auto;border-bottom:1px solid var(--line);margin-top:10px}
+.tabs button{border:0;border-bottom:3px solid transparent;background:transparent;color:var(--muted);font:600 15px var(--body);padding:10px 12px;cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+.badge{display:inline-block;min-width:20px;padding:0 6px;border-radius:99px;background:var(--hold-bg);color:var(--hold);font:600 12px/20px var(--body);text-align:center;font-variant-numeric:tabular-nums}
+main{display:flex;flex-direction:column;gap:14px;padding-top:20px;outline:0}
+h1{font:700 2rem/1.05 var(--display);letter-spacing:.01em;text-transform:uppercase;margin:0;text-wrap:balance}
+h2{font:700 1.25rem/1.1 var(--display);letter-spacing:.03em;text-transform:uppercase;margin:10px 0 0;color:var(--muted)}
+p{margin:0}
+.lede{max-width:65ch;color:var(--muted)}
+.stack{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.pad{padding:16px}
+.clip{display:flex;flex-wrap:wrap;gap:14px;padding:14px}
+.clip .body{flex:1 1 260px;min-width:0;display:flex;flex-direction:column;gap:8px}
+.meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ev{font:700 1.15rem/1 var(--display);letter-spacing:.02em;text-transform:uppercase;font-variant-numeric:tabular-nums}
+.why,.dim{color:var(--muted);font-size:13.5px}
+.choices{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
+.frame{position:relative;flex:none;width:132px;max-width:100%;aspect-ratio:4/3;border-radius:8px;overflow:hidden;display:grid;place-items:center;
+  background:repeating-linear-gradient(90deg,var(--pitch) 0 22px,var(--pitch-2) 22px 44px)}
+.jersey{width:58%;aspect-ratio:1/1;background:var(--jersey);display:grid;place-items:center;padding-top:14%;
+  clip-path:polygon(22% 0,38% 0,50% 10%,62% 0,78% 0,100% 18%,88% 36%,80% 30%,80% 100%,20% 100%,20% 30%,12% 36%,0 18%)}
+.digits{display:flex;gap:1px;font:700 30px/1 var(--display);color:var(--jersey-ink)}
+.digits .unclear{filter:blur(2.5px);opacity:.45}
+.frame .t{position:absolute;left:6px;bottom:5px;padding:1px 5px;border-radius:4px;background:var(--frame-shade);color:var(--frame-ink);font:600 11px var(--body);font-variant-numeric:tabular-nums}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);font:600 14px var(--body);padding:8px 14px;min-height:40px;border-radius:8px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.quiet{background:transparent;border-color:transparent;color:var(--muted);text-decoration:underline;text-underline-offset:3px}
+.btn.quiet:hover{color:var(--ink)}
+.btn.sm{min-height:32px;padding:4px 10px;font-size:13px}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.pill{display:inline-block;padding:2px 9px;border-radius:99px;background:var(--sunk);color:var(--muted);font:600 12px/1.5 var(--body);white-space:nowrap}
+.pill.hold{background:var(--hold-bg);color:var(--hold)} .pill.ok{background:var(--ok-bg);color:var(--ok)} .pill.alert{background:var(--alert-bg);color:var(--alert)}
+.banner{padding:10px 14px;border-radius:8px;background:var(--sunk);max-width:none}
+.banner.ok{background:var(--ok-bg);color:var(--ok)} .banner.tip{background:var(--accent-soft);color:var(--ink)}
+.empty{padding:28px 16px;border:1px dashed var(--line);border-radius:10px;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.rows{list-style:none;margin:0;padding:0 14px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.rows li{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.rows li:last-child{border-bottom:0}
+.grow{flex:1 1 180px;min-width:0;display:flex;flex-direction:column}
+.num{flex:none;width:38px;font:700 26px/1 var(--display);text-align:center;font-variant-numeric:tabular-nums}
+.confirm{display:flex;flex-direction:column;gap:10px;padding:16px}
+.confirm ul{margin:0;padding-left:18px;color:var(--muted)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-weight:600}
+select,input[type="text"]{font:500 15px var(--body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-height:40px;max-width:320px;width:100%}
+input[type="range"]{width:100%;max-width:420px;accent-color:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:0}
+.stats div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.stats dt{font-size:13px;color:var(--muted)}
+.stats dd{margin:2px 0 0;font:700 1.6rem/1.1 var(--display);font-variant-numeric:tabular-nums}
+.stats dd small{font:500 13px var(--body);color:var(--muted)}
+.log{margin:0;padding:0 14px;list-style:none;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.log li{padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.log li:last-child{border-bottom:0}
+.log .dim{display:inline-block;min-width:74px;font-variant-numeric:tabular-nums}
+footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+footer a{color:var(--accent)}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:600;max-width:calc(100% - 32px);z-index:10}
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+(function(){
+const TEAM='Ridgeline U12', GAME='Saturday vs Eastfield';
+const ROSTER=[
+ {no:1,name:'Ava Lindqvist'},{no:4,name:'Priya Nair'},{no:5,name:'Chloe Park'},{no:7,name:'Sofia Marchetti'},
+ {no:8,name:'Emma Dubois'},{no:9,name:'Hannah Okafor'},{no:11,name:'Zoe Castellanos'},{no:14,name:'Maya Thompson'},
+ {no:23,name:'Lena Fischer'},{no:32,name:'Riley Brooks'}];
+// frame: digits the camera saw; 1 = clear, 0 = unclear
+const CLIPS=[
+ {id:'c01',t:'08:15',ev:'Shot on goal',tag:7,conf:96,frame:[['7',1]]},
+ {id:'c02',t:'12:40',ev:'Goal',tag:14,conf:71,frame:[['1',0],['4',1]]},
+ {id:'c03',t:'15:30',ev:'Goal',tag:9,conf:93,frame:[['9',1]]},
+ {id:'c04',t:'19:02',ev:'Save',tag:1,conf:95,frame:[['1',1]]},
+ {id:'c05',t:'22:10',ev:'Big play',tag:23,conf:97,frame:[['2',1],['3',1]]},
+ {id:'c06',t:'27:05',ev:'Save',tag:11,conf:64,frame:[['1',1],['1',0]]},
+ {id:'c07',t:'30:47',ev:'Big play',tag:4,conf:95,frame:[['4',1]]},
+ {id:'c08',t:'33:18',ev:'Assist',tag:23,conf:82,frame:[['2',0],['3',0]]},
+ {id:'c09',t:'38:44',ev:'Big play',tag:14,conf:94,frame:[['4',1]]},
+ {id:'c10',t:'41:52',ev:'Big play',tag:4,conf:78,frame:[['1',0],['4',1]]},
+ {id:'c11',t:'44:09',ev:'Shot on goal',tag:8,conf:91,frame:[['8',1]]},
+ {id:'c12',t:'47:20',ev:'Assist',tag:7,conf:88,frame:[['7',1]]},
+ {id:'c13',t:'50:03',ev:'Goal',tag:11,conf:92,frame:[['1',1],['1',1]]},
+ {id:'c14',t:'55:10',ev:'Goal',tag:32,conf:58,frame:[['3',0],['2',0]]},
+ {id:'c15',t:'58:31',ev:'Big play',tag:5,conf:91,frame:[['5',1]]}];
+
+let st, toastTimer;
+const $=s=>document.querySelector(s);
+const P=no=>ROSTER.find(p=>p.no===no);
+const first=no=>P(no).name.split(' ')[0];
+const label=no=>'#'+no+' '+P(no).name;
+const clip=id=>CLIPS.find(c=>c.id===id);
+const pl=(n,w)=>n===1?w:w+'s';
+const now=()=>new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+
+/* Look-alike rules from the spec */
+function dropPair(a,b){const x=String(a),y=String(b);const l=x.length>y.length?x:y,s=x.length>y.length?y:x;
+  if(l.length!==s.length+1)return false;
+  for(let i=0;i<l.length;i++){if(l.slice(0,i)+l.slice(i+1)===s)return true}return false}
+function anaPair(a,b){const x=String(a),y=String(b);return x!==y&&x.length===y.length&&[...x].sort().join('')===[...y].sort().join('')}
+function isPair(a,b){return a!==b&&(dropPair(a,b)||anaPair(a,b))}
+function reason(a,b){return dropPair(a,b)?Math.max(a,b)+' with one digit hidden reads as '+Math.min(a,b):a+' and '+b+' are the same digits in a different order'}
+const lookalikes=no=>ROSTER.filter(p=>isPair(no,p.no));
+
+function fresh(){
+  const s={role:'coach',tab:'review',threshold:90,decisions:{},reports:{},reportLog:[],sent:false,sentAt:null,sentReels:[],heldAtSend:0,parentOf:14,confirmSend:false,confirmReport:null,log:[]};
+  return s}
+function log(text){st.log.unshift({at:now(),text})}
+
+const ruleFlag=c=>lookalikes(c.tag).length>0&&c.conf<st.threshold;
+function status(c){const d=st.decisions[c.id];
+  if(d)return{k:'decided',owner:d.to};
+  if(st.reports[c.id])return{k:'held'};
+  if(ruleFlag(c))return{k:'held'};
+  return{k:'auto',owner:c.tag}}
+const held=()=>CLIPS.filter(c=>status(c).k==='held');
+const reel=no=>CLIPS.filter(c=>status(c).owner===no);
+
+/* Actions */
+function decide(id,to){const c=clip(id);
+  st.decisions[id]={to:to};
+  let msg;
+  if(to==null){msg='Left out of every reel';log(c.ev+' '+c.t+': coach left it out of every reel')}
+  else{
+    log(c.ev+' '+c.t+': coach '+(to===c.tag?'confirmed ':'changed #'+c.tag+' to ')+label(to));
+    msg='Added to '+first(to)+"'s reel";
+    if(st.sent&&!st.sentReels.includes(to)){st.sentReels.push(to);msg=first(to)+"'s reel sent";log('Reel sent to '+P(to).name+"'s family")}
+  }
+  render();toast(msg)}
+function undo(id){if(st.sent)return;const c=clip(id);delete st.decisions[id];log(c.ev+' '+c.t+': coach undid the decision');render();toast('Back in the review queue')}
+function send(){const h=held().length;
+  st.sent=true;st.sentAt=now();st.confirmSend=false;st.heldAtSend=h;
+  st.sentReels=ROSTER.filter(p=>reel(p.no).length).map(p=>p.no);
+  log(st.sentReels.length+' reels sent. Team recap sent to all '+ROSTER.length+' families');
+  if(h)log('One reminder sent to the coach: '+h+' '+pl(h,'clip')+' still held');
+  render();toast('Reels and team recap sent')}
+function report(id){const c=clip(id),by=st.parentOf,missed=!ruleFlag(c);
+  delete st.decisions[id];st.reports[id]={by:by};st.reportLog.push({id:id,by:by,missed:missed});st.confirmReport=null;
+  log(c.ev+' '+c.t+': '+P(by).name+"'s family reported \"Not my kid\""+(missed?' (the check had not flagged this clip)':''));
+  render();toast('Removed. The coach has been told')}
+
+/* Views */
+function frame(c){return '<div class="frame" role="img" aria-label="Sample still of the jersey the camera saw"><div class="jersey"><div class="digits">'+
+  c.frame.map(d=>'<span'+(d[1]?'':' class="unclear"')+'>'+d[0]+'</span>').join('')+'</div></div><span class="t">'+c.t+'</span></div>'}
+
+function header(){return '<header class="top"><div class="brand"><span class="mark">SidelineReel</span><span class="sub">'+TEAM+' · '+GAME+'</span></div>'+
+  '<div class="ctl"><div class="seg" role="group" aria-label="View as">'+
+  ['coach','parent'].map(r=>'<button type="button" data-action="role" data-role="'+r+'" aria-pressed="'+(st.role===r)+'">'+(r==='coach'?'Coach':'Parent')+'</button>').join('')+
+  '</div><button type="button" class="btn quiet" data-action="reset">Reset demo</button></div></header>'+
+  '<p class="sample">Working prototype with sample data. The players, clips and stills are made up. Blurred digits are ones the camera could not read.</p>'}
+
+function coach(){const h=held().length;
+  const tabs=[['review','Review'],['send','Send reels'],['roster','Roster'],['health','Tagging health']];
+  const views={review:review,send:sendView,roster:roster,health:health};
+  return '<div class="tabs" role="tablist" aria-label="Coach sections">'+tabs.map(t=>'<button type="button" role="tab" aria-selected="'+(st.tab===t[0])+'" data-action="tab" data-tab="'+t[0]+'">'+t[1]+
+    (t[0]==='review'?' <span class="badge" id="revBadge"'+(h?'':' hidden')+'>'+h+'</span>':'')+'</button>').join('')+
+    '</div><main id="main" tabindex="-1">'+views[st.tab]()+'</main>'}
+
+function card(c){const rep=st.reports[c.id],la=lookalikes(c.tag);
+  const cands=[c.tag].concat(la.map(p=>p.no));
+  const why=la.length?'Look-alike numbers on this roster: '+la.map(p=>reason(c.tag,p.no)+' ('+p.name+')').join('; ')+'.'
+    :'#'+c.tag+' has no look-alike on this roster, so the check did not hold this clip.';
+  return '<article class="card clip">'+frame(c)+'<div class="body"><div class="meta">'+
+    (rep?'<span class="pill alert">Parent reported</span>':'<span class="pill hold">Held</span>')+'<span class="ev">'+c.ev+' · '+c.t+'</span></div>'+
+    '<p>'+(rep?P(rep.by).name+"'s family says this is not their kid. It is already out of that reel.":'Tagged as <b>'+label(c.tag)+'</b>, '+c.conf+'% confident.')+'</p>'+
+    '<p class="why">'+(rep?'Tagged as '+label(c.tag)+', '+c.conf+'% confident. ':'')+why+'</p>'+
+    '<div class="choices" role="group" aria-label="Who is in this clip?">'+
+    cands.map(n=>'<button type="button" class="btn" data-action="decide" data-id="'+c.id+'" data-to="'+n+'">It\'s #'+n+' '+first(n)+'</button>').join('')+
+    '<button type="button" class="btn quiet" data-action="decide" data-id="'+c.id+'" data-to="out">Leave it out</button></div></div></article>'}
+
+function decRow(c){const d=st.decisions[c.id];
+  const where=d.to==null?'Left out of every reel':'In '+first(d.to)+"'s reel (#"+d.to+')';
+  const tag=d.to==null?'<span class="pill">Left out</span>':d.to===c.tag?'<span class="pill ok">Confirmed</span>':'<span class="pill hold">Changed from #'+c.tag+'</span>';
+  return '<li><span class="grow"><b>'+c.ev+' · '+c.t+'</b><span class="dim">'+where+'</span></span>'+tag+
+    (st.sent?'<span class="dim">Locked after send</span>':'<button type="button" class="btn quiet sm" data-action="undo" data-id="'+c.id+'">Undo</button>')+'</li>'}
+
+function review(){
+  const hs=held().sort((a,b)=>(st.reports[b.id]?1:0)-(st.reports[a.id]?1:0));
+  const dec=CLIPS.filter(c=>st.decisions[c.id]);
+  const auto=CLIPS.filter(c=>status(c).k==='auto').length;
+  let h='<h1>Review look-alike tags</h1><p class="lede">'+(hs.length?hs.length+' '+pl(hs.length,'clip')+' held until you say who it is. ':'Nothing is waiting on you. ')+
+    auto+' of '+CLIPS.length+' clips were confident enough to go straight into reels.</p>';
+  if(st.sent)h+='<p class="banner ok">Reels went out at '+st.sentAt+'. What you decide now is added to the reel right away.</p>';
+  h+=hs.length?'<div class="stack">'+hs.map(card).join('')+'</div>'
+    :'<div class="empty"><p><b>Queue clear.</b> Every held clip has an answer.</p>'+(st.sent?'':'<button type="button" class="btn primary" data-action="tab" data-tab="send">Go to Send reels</button>')+'</div>';
+  if(dec.length)h+='<h2>Decided</h2><ul class="rows">'+dec.map(decRow).join('')+'</ul>';
+  return h}
+
+function sendView(){const hs=held();let ready=0;const waiting=[];
+  const rows=ROSTER.map(p=>{const n=reel(p.no).length,w=hs.filter(c=>c.tag===p.no).length;let pill;
+    if(st.sent)pill=st.sentReels.includes(p.no)?'<span class="pill ok">Sent</span>':w?'<span class="pill hold">Waiting on your review</span>':'<span class="pill">No highlights</span>';
+    else if(n){ready++;pill='<span class="pill ok">Ready</span>'}
+    else if(w){waiting.push(first(p.no));pill='<span class="pill hold">Will wait</span>'}
+    else pill='<span class="pill">No highlights</span>';
+    return '<li><span class="num">'+p.no+'</span><span class="grow"><b>'+p.name+'</b><span class="dim">'+n+' '+pl(n,'clip')+' in reel'+(w?', '+w+' held':'')+'</span></span>'+pill+'</li>'}).join('');
+  let h='<h1>Send reels</h1>';
+  if(st.sent){
+    h+='<div class="card confirm"><p><b>Sent at '+st.sentAt+'.</b> '+st.sentReels.length+' reels are out and the team recap went to all '+ROSTER.length+' families.</p>'+
+      (st.heldAtSend?'<p class="dim">'+st.heldAtSend+' '+pl(st.heldAtSend,'clip')+' '+(st.heldAtSend===1?'was':'were')+' still held and left out. You got one reminder.</p>':'')+
+      '<div class="choices"><button type="button" class="btn primary" data-action="role" data-role="parent">See what a parent sees</button>'+
+      (hs.length?'<button type="button" class="btn" data-action="tab" data-tab="review">Review '+hs.length+' held '+pl(hs.length,'clip')+'</button>':'')+'</div></div>';
+  }else{
+    h+='<p class="lede">'+ready+' of '+ROSTER.length+' reels are ready. '+(hs.length?hs.length+' held '+pl(hs.length,'clip')+' will be left out. ':'Nothing is held. ')+
+      (waiting.length?waiting.join(' and ')+"'s reel will wait, because every clip in it is held.":'')+'</p>';
+    if(st.confirmSend){
+      h+='<div class="card confirm"><p><b>Send '+ready+' reels and the team recap now?</b></p><ul><li>The team recap goes to all '+ROSTER.length+' families.</li>'+
+        (hs.length?'<li>'+hs.length+' held '+pl(hs.length,'clip')+' will be left out. You can still decide them after sending.</li>':'')+
+        (waiting.length?'<li>'+waiting.join(' and ')+"'s reel waits until you review it.</li>":'')+
+        '<li>Decisions you already made can no longer be undone.</li></ul>'+
+        '<div class="choices"><button type="button" class="btn primary" data-action="send">Send now</button><button type="button" class="btn quiet" data-action="cancelSend">Not yet</button></div></div>';
+    }else{
+      h+='<div class="choices"><button type="button" class="btn primary" data-action="askSend">Send reels and team recap</button>'+
+        (hs.length?'<button type="button" class="btn" data-action="tab" data-tab="review">Review '+hs.length+' held '+pl(hs.length,'clip')+' first</button>':'')+'</div>';
+    }
+  }
+  return h+'<ul class="rows">'+rows+'</ul>'}
+
+function checkResult(raw){const v=String(raw||'').trim();
+  if(!v)return 'Type a number from 1 to 99.';
+  if(!/^\d{1,2}$/.test(v)||+v<1)return 'Enter a whole number from 1 to 99.';
+  const n=+v,own=P(n),la=lookalikes(n);
+  const pre=own?'#'+n+' is '+own.name+'. ':'#'+n+' is free. ';
+  return la.length?pre+'It can be confused with '+la.map(p=>'#'+p.no+' '+p.name+' ('+reason(n,p.no)+')').join(', and with ')+'.'
+    :pre+'No look-alikes on this roster.'}
+
+function roster(){
+  return '<h1>Roster</h1><p class="lede">Two numbers are look-alikes when one digit hidden turns one into the other, or when they are the same digits in a different order.</p>'+
+    '<div class="card pad"><div class="field"><label for="checkNo">Check a jersey number before you hand it out</label>'+
+    '<input type="text" id="checkNo" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="e.g. 41"><p class="dim" id="checkOut" aria-live="polite">'+checkResult('')+'</p></div></div>'+
+    '<ul class="rows">'+ROSTER.map(p=>{const la=lookalikes(p.no);
+      return '<li><span class="num">'+p.no+'</span><span class="grow"><b>'+p.name+'</b></span>'+
+        (la.length?'<span class="pill hold">Look-alike with '+la.map(x=>'#'+x.no).join(', ')+'</span>':'<span class="pill">No look-alikes</span>')+'</li>'}).join('')+'</ul>'}
+
+function live(){const fl=CLIPS.filter(ruleFlag);
+  const rev=fl.filter(c=>st.decisions[c.id]),chg=rev.filter(c=>st.decisions[c.id].to!==c.tag).length;
+  const missed=st.reportLog.filter(r=>r.missed).length;
+  return '<p class="dim">'+(st.sent?'Locked for this game because reels were sent. A new value applies to the next game.'
+      :'At '+st.threshold+'%, '+fl.length+' of '+CLIPS.length+' clips in this game are held for review.')+'</p>'+
+    '<dl class="stats"><div><dt>Clips held by the check</dt><dd>'+fl.length+' <small>of '+CLIPS.length+'</small></dd></div>'+
+    '<div><dt>Tags the coach changed</dt><dd>'+chg+' <small>of '+rev.length+' reviewed</small></dd></div>'+
+    '<div><dt>Still held when reels went out</dt><dd>'+(st.sent?st.heldAtSend:'<small>Not sent yet</small>')+'</dd></div>'+
+    '<div><dt>Parent "Not my kid" reports</dt><dd>'+st.reportLog.length+'</dd></div>'+
+    '<div><dt>Reports on clips the check let through</dt><dd>'+missed+' <small>the blind-spot number</small></dd></div></dl>'}
+
+function health(){
+  return '<h1>Tagging health</h1><p class="lede">The numbers that show whether the check is working, for this one game. They change as you click through the prototype.</p>'+
+    '<div class="card pad"><div class="field"><label for="thr">Hold a look-alike tag when confidence is below <output id="thrVal">'+st.threshold+'%</output></label>'+
+    '<input type="range" id="thr" min="60" max="99" step="1" value="'+st.threshold+'"'+(st.sent?' disabled':'')+'></div></div>'+
+    '<div id="live" class="stack">'+live()+'</div>'+
+    '<h2>Activity</h2>'+(st.log.length?'<ol class="log">'+st.log.map(e=>'<li><span class="dim">'+e.at+'</span> '+e.text+'</li>').join('')+'</ol>'
+      :'<div class="empty"><p>Nothing yet. Decisions, sends and parent reports are listed here as they happen.</p></div>')}
+
+function parent(){const no=st.parentOf,f=first(no);
+  let h='<main id="main" tabindex="-1"><h1>'+f+"'s reel</h1>"+
+    '<div class="field"><label for="parentOf">Viewing as the family of</label><select id="parentOf">'+
+    ROSTER.map(p=>'<option value="'+p.no+'"'+(p.no===no?' selected':'')+'>'+p.name+' (#'+p.no+')</option>').join('')+'</select></div>';
+  const mine=st.reportLog.filter(r=>r.by===no);
+  if(!st.sent){
+    h+='<div class="empty"><p><b>No reel yet.</b> This week\'s reel arrives once the coach sends it.</p><button type="button" class="btn" data-action="role" data-role="coach">Switch to the coach view</button></div>';
+  }else if(!st.sentReels.includes(no)){
+    const w=held().some(c=>c.tag===no);
+    h+='<div class="empty"><p>'+(w?'<b>'+f+"'s reel is on hold.</b> The coach is checking a clip before it goes out. The team recap was sent."
+      :'<b>No highlights for '+f+' this game.</b> The team recap was sent.')+'</p></div>';
+  }else{
+    const r=reel(no);
+    const odd=r.find(c=>c.frame.every(d=>d[1])&&c.frame.map(d=>d[0]).join('')!==String(no));
+    h+='<p class="lede">'+GAME+' · '+r.length+' '+pl(r.length,'clip')+'. If a clip is not '+f+', say so and it comes out right away.</p>';
+    if(odd)h+='<p class="banner tip"><b>Demo tip.</b> '+f+' wears #'+no+'. One clip here shows #'+odd.frame.map(d=>d[0]).join('')+'.</p>';
+    h+=r.length?'<div class="stack">'+r.map(c=>'<article class="card clip">'+frame(c)+'<div class="body"><div class="meta"><span class="ev">'+c.ev+' · '+c.t+'</span></div>'+
+        (st.confirmReport===c.id
+          ?'<p>Remove this clip from '+f+"'s reel and tell the coach?</p><div class=\"choices\"><button type=\"button\" class=\"btn primary\" data-action=\"report\" data-id=\""+c.id+'">Yes, remove it</button><button type="button" class="btn quiet" data-action="cancelReport">Keep it</button></div>'
+          :'<div class="choices"><button type="button" class="btn" data-action="askReport" data-id="'+c.id+'">Not my kid</button></div>')+
+        '</div></article>').join('')+'</div>'
+      :'<div class="empty"><p><b>No clips left in this reel.</b> The coach has been told.</p></div>';
+  }
+  if(mine.length){
+    h+='<h2>Clips you reported</h2><ul class="rows">'+mine.map(m=>{const c=clip(m.id),d=st.decisions[m.id];
+      const s=!d?'<span class="pill hold">Coach is checking</span>':d.to===no?'<span class="pill ok">Coach put it back</span>':'<span class="pill">Removed for good</span>';
+      return '<li><span class="grow"><b>'+c.ev+' · '+c.t+'</b></span>'+s+'</li>'}).join('')+'</ul>';
+  }
+  return h+'</main>'}
+
+function footer(){return '<footer>Prototype by Siddharth Katarki for the Product Manager assessment at <a href="https://ajaia.ai" target="_blank" rel="noopener">Ajaia (ajaia.ai)</a>. Sample data only.</footer>'}
+
+function render(){$('#app').innerHTML=header()+(st.role==='coach'?coach():parent())+footer()}
+function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>{t.hidden=true},2600)}
+function focusMain(){const m=$('#main');if(m)m.focus({preventScroll:true});window.scrollTo(0,0)}
+
+document.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;const a=b.dataset.action,id=b.dataset.id;
+  if(a==='role'){st.role=b.dataset.role;st.confirmReport=null;st.confirmSend=false;render();focusMain()}
+  else if(a==='tab'){st.tab=b.dataset.tab;st.confirmSend=false;render();focusMain()}
+  else if(a==='reset'){st=fresh();render();toast('Demo reset')}
+  else if(a==='decide'){decide(id,b.dataset.to==='out'?null:+b.dataset.to)}
+  else if(a==='undo'){undo(id)}
+  else if(a==='askSend'){st.confirmSend=true;render()}
+  else if(a==='cancelSend'){st.confirmSend=false;render()}
+  else if(a==='send'){send()}
+  else if(a==='askReport'){st.confirmReport=id;render()}
+  else if(a==='cancelReport'){st.confirmReport=null;render()}
+  else if(a==='report'){report(id)}
+});
+document.addEventListener('change',e=>{
+  if(e.target.id==='parentOf'){st.parentOf=+e.target.value;st.confirmReport=null;render();$('#parentOf').focus()}
+  else if(e.target.id==='thr'){log('Hold threshold set to '+st.threshold+'%');render();$('#thr').focus()}
+});
+document.addEventListener('input',e=>{
+  if(e.target.id==='thr'){st.threshold=+e.target.value;$('#thrVal').textContent=st.threshold+'%';$('#live').innerHTML=live();
+    const n=held().length,bd=$('#revBadge');bd.textContent=n;bd.hidden=!n}
+  else if(e.target.id==='checkNo'){$('#checkOut').textContent=checkResult(e.target.value)}
+});
+
+st=fresh();render();
+})();
+</script>
+
+</body>
+</html>
